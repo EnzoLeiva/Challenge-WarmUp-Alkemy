@@ -40,7 +40,7 @@ namespace Challenge_WarmUp_Alkemy.Controllers
             {
                 return new NotFoundObjectResult("ERROR: El blog que usted está buscando no existe");
             }
-            return View("Details", b);
+            return View("Edit", b);
 
         }
 
