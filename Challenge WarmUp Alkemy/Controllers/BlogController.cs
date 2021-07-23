@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Challenge_WarmUp_Alkemy.Data;
 using Challenge_WarmUp_Alkemy.Models;
+using System.Net;
 
 namespace Challenge_WarmUp_Alkemy.Controllers
 {
@@ -22,7 +23,7 @@ namespace Challenge_WarmUp_Alkemy.Controllers
         // GET: Blog
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Blogs.ToListAsync());
+            return View(await _context.Blogs.OrderBy(x => x.FechaCreacion).ToListAsync());
         }
 
         // GET: Search
@@ -34,7 +35,13 @@ namespace Challenge_WarmUp_Alkemy.Controllers
         // GET: Results
         public async Task<IActionResult> ShowSearchResults(string Blog)
         {
-            return View("Index", await _context.Blogs.Where(x => x.Titulo.Contains(Blog)).ToListAsync());
+            var b = await _context.Blogs.Where(x => x.Titulo.Contains(Blog)).ToListAsync();
+            if (b.Count == 0)
+            {
+                return new NotFoundObjectResult($"ERROR: El blog que usted está buscando con el nombre de {Blog} no existe");
+            }
+            return View("Index", b);
+
         }
 
         // GET: Blog/Details/5
@@ -61,9 +68,6 @@ namespace Challenge_WarmUp_Alkemy.Controllers
             return View();
         }
 
-        // POST: Blog/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("BlogID,Titulo,Contenido,Imagen,Categoria,FechaCreacion")] Blog blog)
