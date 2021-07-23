@@ -23,7 +23,7 @@ namespace Challenge_WarmUp_Alkemy.Controllers
         // GET: Blog
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Blogs.OrderBy(x => x.FechaCreacion).ToListAsync());
+            return View(await _context.Blogs.Where(x => x.IsDeleted == false).OrderBy(x => x.FechaCreacion).ToListAsync());
         }
 
         // GET: Search
@@ -33,14 +33,14 @@ namespace Challenge_WarmUp_Alkemy.Controllers
         }
 
         // GET: Results
-        public async Task<IActionResult> ShowSearchResults(string Blog)
+        public async Task<IActionResult> ShowSearchResults(int Id)
         {
-            var b = await _context.Blogs.Where(x => x.Titulo.Contains(Blog)).ToListAsync();
-            if (b.Count == 0)
+            var b = await _context.Blogs.FirstOrDefaultAsync(x => x.BlogID == Id);
+            if (b == null)
             {
-                return new NotFoundObjectResult($"ERROR: El blog que usted está buscando con el nombre de {Blog} no existe");
+                return new NotFoundObjectResult("ERROR: El blog que usted está buscando no existe");
             }
-            return View("Index", b);
+            return View("Details", b);
 
         }
 
@@ -156,7 +156,8 @@ namespace Challenge_WarmUp_Alkemy.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var blog = await _context.Blogs.FindAsync(id);
-            _context.Blogs.Remove(blog);
+            //_context.Blogs.Remove(blog);
+            blog.IsDeleted = true;
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
